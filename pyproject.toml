@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["safearena"]
+
+[project]
+name = "safearena"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "browsergym",
+    "libwebarena",
+    "playwright",
+    "agentlab"
+]
+description = "SafeArena is a benchmark for agent safety"
+readme = "README.md"
+authors = [
+    {name = "SafeArena Team", email = "safearena@googlegroups.com"}
+]
+urls = {
+    "Homepage" = "https://safearena.github.io",
+    "Repository" = "https://github.com/mcgill-nlp/safearena"
+}
+
+[project.optional-dependencies]
+dev = [
+    "black",
+]
+
+[tool.setuptools.package-data]
+'safearena' = ['*.json']

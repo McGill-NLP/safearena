@@ -1,0 +1,4 @@
+browsergym==0.13.1
+libwebarena==0.0.4
+playwright==1.44.0
+git+https://github.com/ServiceNow/AgentLab@71ec578c376121af2152fe731bc1dbcbdb7e908a
