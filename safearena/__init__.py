@@ -101,93 +101,9 @@ class SafeArenaBenchmark(Benchmark):
         return __version__
 
 
-
-
-# Existing Study object requires reproducibility info; we overwrite temporarily (also raises unknown benchmark error otherwise)
-class SafeArenaStudy(Study):
-    def __init__(
-        self, single_agent_args: GenericAgentArgs, benchmark, suffix=None, 
-    ):
-        self.single_agent_args = single_agent_args
-        self.benchmark = benchmark
-        self.suffix = suffix
-
-        super().__init__(agent_args=[single_agent_args], benchmark=benchmark, suffix=suffix)
-
-    @property
-    def name(self):
-        _task_env_var = os.getenv("SAFEARENA_TASK", "unknown_task")
-        study_name = f"{self.agent_args[0].agent_name}_on_{self.benchmark.name}_{_task_env_var}"
-
-        if self.suffix:
-            study_name += f"_{self.suffix}"
-        
-        study_name = slugify(study_name, max_length=500, allow_unicode=True)
-
-        return study_name
-
-
-    def make_exp_args_list(self):
-        self.exp_args_list = self._agent_on_benchmark_(
-            single_agent_args=self.single_agent_args,
-            benchmark=self.benchmark,
-        )
-        return self.exp_args_list
-    
-    
-    def set_reproducibility_info(self, strict_reproducibility=False, comment=None):
-        """Gather relevant information that may affect the reproducibility of the experiment
-
-        e.g.: versions of BrowserGym, benchmark, AgentLab..."""
-        agent_names = [a.agent_name for a in self.agent_args]
-        info = repro.get_reproducibility_info(
-            agent_names,
-            self.benchmark,
-            self.uuid,
-            ignore_changes=not strict_reproducibility,
-            comment=comment,
-        )
-        if self.reproducibility_info is not None:
-            repro.assert_compatible(
-                self.reproducibility_info, info, raise_if_incompatible=strict_reproducibility
-            )
-        self.reproducibility_info = info
-    
-    
-
-    def _agent_on_benchmark_(
-        self,
-        benchmark: bgym.Benchmark,
-        single_agent_args: AgentArgs = None,
-        demo_mode=False,
-        logging_level: int = logging.INFO,
-        logging_level_stdout: int = logging.INFO,
-    ):
-
-        env_args_list = benchmark.env_args_list
-        exp_args_list = []
-        for env_args in env_args_list:
-            single_agent_args.set_benchmark(benchmark, demo_mode=demo_mode)
-            exp_args = ExpArgs(
-                agent_args=single_agent_args,
-                env_args=env_args,
-                logging_level=logging_level,
-                logging_level_stdout=logging_level_stdout,
-            )
-
-            exp_args_list.append(exp_args)
-
-        for i, exp_args in enumerate(exp_args_list):
-            exp_args.order = i
-        
-        return exp_args_list
-
-
-
-
-def create_default_benchmark(task_ids):
+def create_default_benchmark(task_ids, name="safearena"):
     benchmark = SafeArenaBenchmark(
-        name="safearena",
+        name=name,
         high_level_action_set_args=HighLevelActionSetArgs(
             subsets=["webarena"],
             multiaction=False,
