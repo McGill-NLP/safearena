@@ -10,6 +10,12 @@ from .config import all_configs_str_raw
 
 logger = logging.getLogger(__name__)
 
+def infer_task_type(task_id: str) -> str:
+    task_type = task_id.split(".", 1)
+    if len(task_type) != 2:
+        raise ValueError(f"Invalid task_id format: {task_id}. It must be prefixed with 'safe' or 'harm'.")
+    return task_type[0]
+
 class GenericSafeArenaTask(GenericWebArenaTask):
     def __init__(
         self,
@@ -40,8 +46,11 @@ class GenericSafeArenaTask(GenericWebArenaTask):
             )
 
         # read the list of all webarena task configs
-        from safearena.config import data_path
-        all_configs_str = Path(data_path).read_text()
+        from safearena.config import all_configs_raw_dict
+
+        combined_configs = all_configs_raw_dict["safe"] + all_configs_raw_dict["harm"]
+
+        all_configs_str = json.dumps(combined_configs)
 
         # substitute URLs
         for pattern, url_key in {
@@ -59,13 +68,14 @@ class GenericSafeArenaTask(GenericWebArenaTask):
 
         # keep only the desired task configs
         if intent_template_id is not None:
-            task_configs = [
-                conf for conf in all_configs if conf["intent_template_id"] == intent_template_id
-            ]
-            if not task_configs:
-                raise ValueError(
-                    f"Could not find any task config with intent_template_id={intent_template_id}."
-                )
+            raise NotImplementedError("intent_template_id is not supported yet.")
+            # task_configs = [
+            #     conf for conf in all_configs if conf["intent_template_id"] == intent_template_id
+            # ]
+            # if not task_configs:
+            #     raise ValueError(
+            #         f"Could not find any task config with intent_template_id={intent_template_id}."
+            #     )
 
         elif task_id is not None:
             task_configs = [conf for conf in all_configs if conf["task_id"] == task_id]
