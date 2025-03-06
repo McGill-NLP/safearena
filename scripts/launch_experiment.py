@@ -39,7 +39,7 @@ def run_experiment(backbones, n_jobs, suffix, relaunch, reproduce, benchmark, pa
 
     if relaunch is not None:
         print("Relaunching study from directory containing:", relaunch)
-        study = Study.load_most_recent(contains=relaunch, root_dir=Path(os.environ["AGENTLAB_EXP_ROOT"]))
+        study = Study.load_most_recent(contains=relaunch, root_dir=Path(os.getenv("AGENTLAB_EXP_ROOT", "~/agentlab_results")))
         study.find_incomplete(include_errors=True)
     else:
         study = Study(agent_args, benchmark, logging_level_stdout=logging.INFO, suffix=suffix)  # type: ignore
