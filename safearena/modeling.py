@@ -5,6 +5,10 @@ export OPENAI_API_KEY="..."
 """
 
 import os
+
+from safearena.harmful_agent import HarmfulGenericAgentArgs
+
+
 from agentlab.agents.generic_agent.generic_agent import GenericAgentArgs
 from agentlab.llm.chat_api import OpenAIModelArgs, OpenRouterModelArgs
 
@@ -162,6 +166,7 @@ def prepare_vllm_model(
     enable_chat=False,
     base_url=None,
     api_key=None,
+    harmful=False,
 ):
     # the base url and api key are set in VllmModelArgs's make_model,
     # so it is not necessary to set them here, but it is possible if needed
@@ -177,15 +182,27 @@ def prepare_vllm_model(
     if api_key is not None:
         model_args.set_api_key(api_key)
 
-    agent_args = GenericAgentArgs(
-        chat_model_args=model_args,
-        flags=get_default_flags(
-            max_prompt_tokens=max_prompt_tokens,
-            use_som=use_vision,
-            use_screenshot=use_vision,
-            enable_chat=enable_chat,
-        ),
-    )
+    if harmful:
+        agent_args = HarmfulGenericAgentArgs(
+            chat_model_args=model_args,
+            flags=get_default_flags(
+                max_prompt_tokens=max_prompt_tokens,
+                use_som=use_vision,
+                use_screenshot=use_vision,
+                enable_chat=enable_chat,
+            ),
+        )
+
+    else:
+        agent_args = GenericAgentArgs(
+            chat_model_args=model_args,
+            flags=get_default_flags(
+                max_prompt_tokens=max_prompt_tokens,
+                use_som=use_vision,
+                use_screenshot=use_vision,
+                enable_chat=enable_chat,
+            ),
+        )
 
     return agent_args
 
@@ -197,22 +214,41 @@ def prepare_together(
     max_total_tokens=16384,
     use_vision=True,
     use_som=True,
+    harmful=False,
 ):
-    agent_args = GenericAgentArgs(
-        chat_model_args=TogetherModelArgs(
-            model_name=model_name,
-            max_total_tokens=max_total_tokens,
-            max_input_tokens=max_total_tokens - max_new_tokens,
-            max_new_tokens=max_new_tokens,
-            vision_support=use_vision,
-            # the base url and api key are set in TogetherModelArgs's make_model
-        ),
-        flags=get_default_flags(
-            max_prompt_tokens=max_prompt_tokens,
-            use_screenshot=use_vision,
-            use_som=use_som,
-        ),
-    )
+    if harmful:
+        agent_args = HarmfulGenericAgentArgs(
+            chat_model_args=TogetherModelArgs(
+                model_name=model_name,
+                max_total_tokens=max_total_tokens,
+                max_input_tokens=max_total_tokens - max_new_tokens,
+                max_new_tokens=max_new_tokens,
+                vision_support=use_vision,
+                # the base url and api key are set in TogetherModelArgs's make_model
+            ),
+            flags=get_default_flags(
+                max_prompt_tokens=max_prompt_tokens,
+                use_screenshot=use_vision,
+                use_som=use_som,
+            ),
+        )
+    
+    else:
+        agent_args = GenericAgentArgs(
+            chat_model_args=TogetherModelArgs(
+                model_name=model_name,
+                max_total_tokens=max_total_tokens,
+                max_input_tokens=max_total_tokens - max_new_tokens,
+                max_new_tokens=max_new_tokens,
+                vision_support=use_vision,
+                # the base url and api key are set in TogetherModelArgs's make_model
+            ),
+            flags=get_default_flags(
+                max_prompt_tokens=max_prompt_tokens,
+                use_screenshot=use_vision,
+                use_som=use_som,
+            ),
+        )
 
     return agent_args
 
@@ -225,22 +261,41 @@ def prepare_gpt(
     use_vision=True,
     use_som=True,
     enable_chat=False,
+    harmful=False,
 ):
-    agent_arg = GenericAgentArgs(
-        chat_model_args=OpenAIModelArgs(
-            model_name=model_name,
-            max_total_tokens=max_total_tokens,
-            max_input_tokens=max_total_tokens - max_new_tokens,
-            max_new_tokens=max_new_tokens,
-            vision_support=use_vision,
-        ),
-        flags=get_default_flags(
-            max_prompt_tokens=max_prompt_tokens,
-            use_screenshot=use_vision,
-            use_som=use_som,
-            enable_chat=enable_chat,
-        ),
-    )
+    if harmful:
+        agent_arg = HarmfulGenericAgentArgs(
+            chat_model_args=OpenAIModelArgs(
+                model_name=model_name,
+                max_total_tokens=max_total_tokens,
+                max_input_tokens=max_total_tokens - max_new_tokens,
+                max_new_tokens=max_new_tokens,
+                vision_support=use_vision,
+            ),
+            flags=get_default_flags(
+                max_prompt_tokens=max_prompt_tokens,
+                use_screenshot=use_vision,
+                use_som=use_som,
+                enable_chat=enable_chat,
+            ),
+        )
+
+    else:
+        agent_arg = GenericAgentArgs(
+            chat_model_args=OpenAIModelArgs(
+                model_name=model_name,
+                max_total_tokens=max_total_tokens,
+                max_input_tokens=max_total_tokens - max_new_tokens,
+                max_new_tokens=max_new_tokens,
+                vision_support=use_vision,
+            ),
+            flags=get_default_flags(
+                max_prompt_tokens=max_prompt_tokens,
+                use_screenshot=use_vision,
+                use_som=use_som,
+                enable_chat=enable_chat,
+            ),
+        )
 
     return agent_arg
 
@@ -253,22 +308,41 @@ def prepare_claude(
     use_vision=True,
     use_som=True,
     enable_chat=False,
+    harmful=False,
 ):
-    agent_arg = GenericAgentArgs(
-        chat_model_args=OpenRouterModelArgs(
-            model_name=model_name,
-            max_total_tokens=max_total_tokens,
-            max_input_tokens=max_total_tokens - max_new_tokens,
-            max_new_tokens=max_new_tokens,
-            vision_support=use_vision,
-        ),
-        flags=get_default_flags(
-            max_prompt_tokens=max_prompt_tokens,
-            use_screenshot=use_vision,
-            use_som=use_som,
-            enable_chat=enable_chat
-        ),
-    )
+    if harmful:
+        agent_arg = HarmfulGenericAgentArgs(
+            chat_model_args=OpenRouterModelArgs(
+                model_name=model_name,
+                max_total_tokens=max_total_tokens,
+                max_input_tokens=max_total_tokens - max_new_tokens,
+                max_new_tokens=max_new_tokens,
+                vision_support=use_vision,
+            ),
+            flags=get_default_flags(
+                max_prompt_tokens=max_prompt_tokens,
+                use_screenshot=use_vision,
+                use_som=use_som,
+                enable_chat=enable_chat
+            ),
+        )
+
+    else:
+        agent_arg = GenericAgentArgs(
+            chat_model_args=OpenRouterModelArgs(
+                model_name=model_name,
+                max_total_tokens=max_total_tokens,
+                max_input_tokens=max_total_tokens - max_new_tokens,
+                max_new_tokens=max_new_tokens,
+                vision_support=use_vision,
+            ),
+            flags=get_default_flags(
+                max_prompt_tokens=max_prompt_tokens,
+                use_screenshot=use_vision,
+                use_som=use_som,
+                enable_chat=enable_chat
+            ),
+        )
 
     return agent_arg
 
@@ -280,8 +354,10 @@ def prepare_gemini(
     use_vision=True,
     use_som=True,
     enable_chat=False,
+    harmful=False,
 ):
-    agent_arg = GenericAgentArgs(
+    if harmful:
+        agent_arg = HarmfulGenericAgentArgs(
         chat_model_args=OpenRouterModelArgs(
             model_name=model_name,
             max_total_tokens=max_total_tokens,
@@ -296,5 +372,22 @@ def prepare_gemini(
             enable_chat=enable_chat
         ),
     )
+
+    else:
+        agent_arg = GenericAgentArgs(
+            chat_model_args=OpenRouterModelArgs(
+                model_name=model_name,
+                max_total_tokens=max_total_tokens,
+                max_input_tokens=max_total_tokens - max_new_tokens,
+                max_new_tokens=max_new_tokens,
+                vision_support=use_vision,
+            ),
+            flags=get_default_flags(
+                max_prompt_tokens=max_prompt_tokens,
+                use_screenshot=use_vision,
+                use_som=use_som,
+                enable_chat=enable_chat
+            ),
+        )
 
     return agent_arg

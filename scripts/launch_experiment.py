@@ -19,23 +19,23 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 backbone_to_args = {
-    "claude-3.5-sonnet": lambda: prepare_claude("anthropic/claude-3.5-sonnet-20240620"),
-    "gpt-4o": lambda: prepare_gpt("gpt-4o-2024-11-20"),
-    "gpt-4o-mini": lambda: prepare_gpt("gpt-4o-mini-2024-07-18"),
-    "llama-3.2-90b": lambda: prepare_vllm_model("meta-llama/Llama-3.2-90B-Vision-Instruct"),
-    "llama-3.2-90b-together": lambda: prepare_together("meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo"),
-    "llama-3.3-70b": lambda: prepare_vllm_model("meta-llama/Llama-3.3-70B-Instruct", use_vision=False),
-    "qwen-2-vl-72b": lambda: prepare_vllm_model("Qwen/Qwen2-VL-72B-Instruct"),
-    "qwen-2.5-vl-72b": lambda: prepare_vllm_model("Qwen/Qwen2.5-VL-72B-Instruct"),
+    "claude-3.5-sonnet": lambda harmful: prepare_claude("anthropic/claude-3.5-sonnet-20240620", harmful=harmful),
+    "gpt-4o": lambda harmful: prepare_gpt("gpt-4o-2024-11-20",harmful=harmful),
+    "gpt-4o-mini": lambda harmful: prepare_gpt("gpt-4o-mini-2024-07-18", harmful=harmful),
+    "llama-3.2-90b": lambda harmful: prepare_vllm_model("meta-llama/Llama-3.2-90B-Vision-Instruct", harmful=harmful),
+    "llama-3.2-90b-together": lambda harmful: prepare_together("meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo", harmful=harmful),
+    "llama-3.3-70b": lambda harmful: prepare_vllm_model("meta-llama/Llama-3.3-70B-Instruct", use_vision=False, harmful=harmful),
+    "qwen-2-vl-72b": lambda harmful: prepare_vllm_model("Qwen/Qwen2-VL-72B-Instruct", harmful=harmful),
+    "qwen-2.5-vl-72b": lambda harmful: prepare_vllm_model("Qwen/Qwen2.5-VL-72B-Instruct", harmful=harmful),
 }
 
-def run_experiment(backbones, n_jobs, suffix, relaunch, reproduce, benchmark, parallel="sequential"):
+def run_experiment(backbones, n_jobs, suffix, relaunch, reproduce, benchmark, parallel="sequential", harmful=False):
     agent_args: List[GenericAgentArgs] = []
 
     for backbone in backbones:
         if backbone not in backbone_to_args:
             raise ValueError(f"Backbone {backbone} not found in available backbones: {list(backbone_to_args.keys())}")
-        agent_args.append(backbone_to_args[backbone]())
+        agent_args.append(backbone_to_args[backbone](harmful))
 
     if relaunch is not None:
         print("Relaunching study from directory containing:", relaunch)
@@ -63,7 +63,7 @@ if __name__ == "__main__":  # necessary for dask backend
         "-b",
         "--backbones",
         type=str,
-        default="4o-mini",
+        default="",
         nargs="+",
         choices=list(backbone_to_args.keys()),
     )
@@ -100,6 +100,14 @@ if __name__ == "__main__":  # necessary for dask backend
         help="""Parallel backend to use. Defaults to : sequential.""",
         choices=["sequential", "ray", "joblib"],
     )
+    parser.add_argument(
+        "--jailbreak",
+        type=bool,
+        default=False,
+        help="""Bool for reproducibility mode. Defaults to : False""",
+        action=argparse.BooleanOptionalAction,
+    )
+
 
     args, unknown = parser.parse_known_args()
 
@@ -121,4 +129,5 @@ if __name__ == "__main__":  # necessary for dask backend
         reproduce=args.reproduce,
         benchmark=benchmark,
         parallel=args.parallel,
+        harmful=args.jailbreak,
     )
