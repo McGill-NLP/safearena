@@ -63,7 +63,7 @@ if __name__ == "__main__":  # necessary for dask backend
         "-b",
         "--backbones",
         type=str,
-        default="4o-mini",
+        default=["gpt-4o-mini"],
         nargs="+",
         choices=list(backbone_to_args.keys()),
     )

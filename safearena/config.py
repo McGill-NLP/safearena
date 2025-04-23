@@ -19,4 +19,12 @@ for option in ['harm', 'safe']:
 
 SAFE_TASK_IDS = [conf["task_id"] for conf in all_configs_raw_dict["safe"]]
 HARM_TASK_IDS = [conf["task_id"] for conf in all_configs_raw_dict["harm"]]
-TASK_IDS = SAFE_TASK_IDS + HARM_TASK_IDS
+TASK_IDS = []
+if _task_env_var == "safe":
+    TASK_IDS = SAFE_TASK_IDS
+elif _task_env_var == "harm":
+    TASK_IDS = HARM_TASK_IDS
+else:
+    raise ValueError(f"Invalid safearena task variable: {_task_env_var}. It should be either 'safe' or 'harm'.")
+
+
